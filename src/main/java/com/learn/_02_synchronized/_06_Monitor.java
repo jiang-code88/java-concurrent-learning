@@ -13,6 +13,10 @@ import java.util.concurrent.locks.ReentrantLock;
 public class _06_Monitor {
 }
 
+/**
+ * 用管程实现一个线程安全的阻塞队列
+ * @param <T>
+ */
 class BlockedQueue<T>{
     private final Lock lock = new ReentrantLock();
 

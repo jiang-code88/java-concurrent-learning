@@ -117,18 +117,18 @@ public class _16_CountDownLatch_CyclicBarrier {
     }
     // 对账系统-线程池并发优化-使用 CountDownLatch 实现同步
     public static void checkSystem_ExecutorOptimize() throws InterruptedException {
-        Executor executor = Executors.newFixedThreadPool(2);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
         while(!orderBank.isEmpty()){ // while(存在未对账订单)
             CountDownLatch latch = new CountDownLatch(2);
 
             // 查询未对账订单
-            executor.execute(() -> {
+            executorService.execute(() -> {
                 pos = getPOrders();
                 latch.countDown();
             });
 
             // 查询派送单
-            executor.execute(()->{
+            executorService.execute(()->{
                 dos = getDOrders();
                 latch.countDown();
             });
@@ -146,6 +146,7 @@ public class _16_CountDownLatch_CyclicBarrier {
             pos = null;
             dos = null;
         }
+        executorService.shutdown();
     }
     // 对账系统-CyclicBarrier优化-优化为更加高效的三路并行
     public static void checkSystem_cyclicBarrierOptimize() throws InterruptedException {
@@ -216,6 +217,7 @@ public class _16_CountDownLatch_CyclicBarrier {
 
         threadGetOrder.join();
         threadGetDelivery.join();
+
         latch.await();
     }
 
@@ -262,25 +264,26 @@ public class _16_CountDownLatch_CyclicBarrier {
         // });
 
         // 3 线程池并发优化-对账系统操作耗时：1290 ms 左右
-        // countTimeExec(object -> {
-        //     try {
-        //         checkSystem_ExecutorOptimize();
-        //     } catch (InterruptedException e) {
-        //         throw new RuntimeException(e);
-        //     }
-        //     return null;
-        // });
-
-        // 4 CyclicBarrier并发优化-对账系统操作耗时：1270 ms 左右
         countTimeExec(object -> {
             try {
-                checkSystem_cyclicBarrierOptimize();
+                checkSystem_ExecutorOptimize();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             return null;
         });
 
+        // 4 CyclicBarrier并发优化-对账系统操作耗时：1270 ms 左右
+        // countTimeExec(object -> {
+        //     try {
+        //         checkSystem_cyclicBarrierOptimize();
+        //     } catch (InterruptedException e) {
+        //         throw new RuntimeException(e);
+        //     }
+        //     return null;
+        // });
+
+        System.out.println("end");
     }
 
 }
