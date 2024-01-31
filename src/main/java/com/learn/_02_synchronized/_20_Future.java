@@ -1,9 +1,11 @@
 package com.learn._02_synchronized;
 
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.*;
 
 /**
- * 异步编程
+ * 获取异步任务的执行结果
  *  - 场景：创建线程池，调用 execute() 提交任务，线程池执行任务，
  *         但是没办法获取任务的执行结果（execute() 方法没有返回值）
  *  - 向线程池中提交执行异步任务：
@@ -22,6 +24,7 @@ import java.util.concurrent.*;
  *    1) 利用 FutureTask 对象可以很容易获取子线程的执行结果。
  *    1) 可以将 FutureTask 对象作为任务提交给 ThreadPoolExecutor 去执行，也可以直接被 Thread 执行；
  *  - Future 适用场景：
+ *    利用多线程可以快速将一些串行的任务并行化，从而提高性能；
  *    如果任务之间有依赖关系，比如当前任务依赖前一个任务的执行结果，这种问题基本上都可以用 Future 来解决。
  */
 public class _20_Future {
@@ -171,7 +174,7 @@ public class _20_Future {
  *  T2 => 洗茶壶 + 洗茶杯 + 拿茶叶
  *
  * T1 执行到「泡茶」时需要依赖「拿茶叶」执行完成才能继续执行，
- * 所以 T1 执行「泡茶」前需要等待 T2 执行完「拿茶叶」才能继续执行。
+ * 所以 T1 执行「泡茶」前需要等待 T2 执行完「拿茶叶」才能继续执行，利用 Future 的特性实现同步等待。
  */
 class demo{
     // T1 执行「洗水壶 -> 烧热水 -> 泡茶」
@@ -229,4 +232,80 @@ class demo{
     }
 }
 
+/**
+ * 电商询价应用
+ *  - 从三个电商询价，然后保存在自己的数据库中
+ */
+class inquiry{
+
+    private static List<String> myDB = new Vector<>();
+
+    public static String getPriceByS1(){
+        return "priceS1";
+    }
+    public static String getPriceByS2(){
+        return "priceS2";
+    }
+    public static String getPriceByS3(){
+        return "priceS3";
+    }
+    public static void save(String price){
+        myDB.add(price);
+    }
+
+    // 由于是串行操作，性能很慢
+    public static void inquiryPrice(){
+        // 向电商S1询价，并保存
+        String r1 = getPriceByS1();
+        save(r1);
+        // 向电商S2询价，并保存
+        String r2 = getPriceByS2();
+        save(r2);
+        // 向电商S3询价，并保存
+        String r3 = getPriceByS3();
+        save(r3);
+    }
+
+    // 串行优化为并行，提高性能
+    public static void inquiryPriceExecutor(){
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+
+        // 向电商S1询价，并保存
+        Future<?> result1 = executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                save(getPriceByS1());
+            }
+        });
+        // 向电商S2询价，并保存
+        Future<?> result2 = executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                save(getPriceByS2());
+            }
+        });
+        // 向电商S3询价，并保存
+        Future<?> result3 = executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                save(getPriceByS3());
+            }
+        });
+
+        while(!(result1.isDone() && result2.isDone() && result3.isDone())){
+            System.out.println("result1: " + result1.isDone());
+            System.out.println("result2: " + result2.isDone());
+            System.out.println("result3: " + result3.isDone());
+        }
+
+        executor.shutdown();
+    }
+
+    public static void main(String[] args) {
+        // inquiryPrice();
+        inquiryPriceExecutor();
+
+        myDB.forEach(System.out::println);
+    }
+}
 
