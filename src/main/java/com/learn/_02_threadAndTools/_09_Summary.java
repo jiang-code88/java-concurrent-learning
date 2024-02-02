@@ -1,4 +1,4 @@
-package com.learn._02_synchronized;
+package com.learn._02_threadAndTools;
 
 public class _09_Summary {
 

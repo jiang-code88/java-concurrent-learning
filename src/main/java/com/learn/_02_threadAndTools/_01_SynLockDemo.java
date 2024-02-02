@@ -1,4 +1,4 @@
-package com.learn._02_synchronized;
+package com.learn._02_threadAndTools;
 
 /**
  * Java 提供的互斥锁 synchronized，用于解决原子性问题

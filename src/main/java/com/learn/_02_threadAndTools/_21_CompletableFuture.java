@@ -1,4 +1,4 @@
-package com.learn._02_synchronized;
+package com.learn._02_threadAndTools;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;

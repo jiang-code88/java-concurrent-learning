@@ -1,6 +1,5 @@
-package com.learn._02_synchronized;
+package com.learn._02_threadAndTools;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.*;

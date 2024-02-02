@@ -1,4 +1,4 @@
-package com.learn._02_synchronized;
+package com.learn._02_threadAndTools;
 
 /**
  * Java 读写锁 ReadWriteLock 的升级版 StampedLock

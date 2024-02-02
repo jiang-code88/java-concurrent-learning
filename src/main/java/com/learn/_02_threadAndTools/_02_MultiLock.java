@@ -1,4 +1,4 @@
-package com.learn._02_synchronized;
+package com.learn._02_threadAndTools;
 
 /**
  * 细粒度锁：使用不同的锁对受保护的资源进行精细化管理，提升性能

@@ -1,4 +1,4 @@
-package com.learn._02_synchronized;
+package com.learn._02_threadAndTools;
 
 /**
  * Lock & Condition 实现的管程是支持多个条件变量的，而 synchronized 只支持一个条件变量
