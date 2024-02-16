@@ -129,7 +129,7 @@ public class _07_ThreadStatus {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    // 抛出 InterruptedException 异常后，线程的中止标志会被重置回 RUNNABLE
+                    // 抛出 InterruptedException 异常并被 catch 捕获后，线程的中止标志会被重置回 RUNNABLE
                     // 所以捕获到异常后，需要设置回中止标志，让线程会停止
                     Thread.currentThread().interrupt();
                     LOGGER.warn("子线程被中止执行", e);
