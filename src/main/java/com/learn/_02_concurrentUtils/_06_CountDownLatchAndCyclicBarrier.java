@@ -1,8 +1,16 @@
-package com.learn._02_threadAndTools;
+package com.learn._02_concurrentUtils;
+
+import com.learn.common.CommTools;
 
 import java.util.List;
 import java.util.Vector;
-import java.util.concurrent.*;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,12 +24,12 @@ import java.util.function.Function;
  *   除此之外，CyclicBarrier 还可以设置回调函数，可以说是功能丰富。
  *
  * 场景：
- * 用户 --> 「在线商城」  --> 订单 --> 订单库
- *          「物流派送」 --> 派送单 --> 派送单库
- *          「对账系统」 --> 未对账订单｜派送单 --> 差异库
+ * 用户 -->  「在线商城」  --> 订单               --> 订单库
+ *          「物流派送」  --> 派送单              --> 派送单库
+ *          「对账系统」  -->「未对账订单｜派送单」  --> 差异库
  *
  */
-public class _16_CountDownLatch_CyclicBarrier {
+public class _06_CountDownLatchAndCyclicBarrier {
     // 订单库
     private static List<String> orderBank = new Vector<>();
 
@@ -33,21 +41,13 @@ public class _16_CountDownLatch_CyclicBarrier {
 
     // 查询未对账订单
     public static String getPOrders(){
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        CommTools.sleep(1, TimeUnit.MILLISECONDS);
         return orderBank.remove(0);
     }
 
     // 查询派送单
     public static String getDOrders(){
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        CommTools.sleep(1, TimeUnit.MILLISECONDS);
         return deliveryBank.remove(0);
     }
 
@@ -84,8 +84,9 @@ public class _16_CountDownLatch_CyclicBarrier {
 
     private static String pos = null;
     private static String dos = null;
+
     // 对账系统-多线程并发优化
-    public static void checkSystem_threadOptimize() throws InterruptedException {
+    public static void checkSystemThreadOptimize() throws InterruptedException {
         while(!orderBank.isEmpty()){ // while(存在未对账订单)
             // 查询未对账订单
             Thread threadPos = new Thread(() -> {
@@ -114,8 +115,9 @@ public class _16_CountDownLatch_CyclicBarrier {
             dos = null;
         }
     }
+
     // 对账系统-线程池并发优化-使用 CountDownLatch 实现同步
-    public static void checkSystem_ExecutorOptimize() throws InterruptedException {
+    public static void checkSystemThreadPoolOptimize() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         while(!orderBank.isEmpty()){ // while(存在未对账订单)
             CountDownLatch latch = new CountDownLatch(2);
@@ -147,8 +149,9 @@ public class _16_CountDownLatch_CyclicBarrier {
         }
         executorService.shutdown();
     }
+
     // 对账系统-CyclicBarrier优化-优化为更加高效的三路并行
-    public static void checkSystem_cyclicBarrierOptimize() throws InterruptedException {
+    public static void checkSystemCyclicBarrierOptimize() throws InterruptedException {
         // 订单队列
         Vector<String> posList = new Vector<>();
 
@@ -172,6 +175,7 @@ public class _16_CountDownLatch_CyclicBarrier {
         });
 
         /* // 执行回调的线程池
+           // 小优化：如果从两个队列中去元素的操作从异步中取出转为同步就可以开多几个线程操作，而不需要限制为单线程操作
         Executor executorA = Executors.newFixedThreadPool(10);
         CyclicBarrier barrieA = new CyclicBarrier(2, ()->{
             String P = posList.remove(0);
@@ -216,7 +220,6 @@ public class _16_CountDownLatch_CyclicBarrier {
 
         threadGetOrder.join();
         threadGetDelivery.join();
-
         latch.await();
     }
 
@@ -255,7 +258,7 @@ public class _16_CountDownLatch_CyclicBarrier {
         // 2 多线程并发优化-对账系统操作耗时：1360 ms 左右
         // countTimeExec(object -> {
         //     try {
-        //         checkSystem_threadOptimize();
+        //         checkSystemThreadOptimize();
         //     } catch (InterruptedException e) {
         //         throw new RuntimeException(e);
         //     }
@@ -265,7 +268,7 @@ public class _16_CountDownLatch_CyclicBarrier {
         // 3 线程池并发优化-对账系统操作耗时：1290 ms 左右
         countTimeExec(object -> {
             try {
-                checkSystem_ExecutorOptimize();
+                checkSystemThreadPoolOptimize();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -275,7 +278,7 @@ public class _16_CountDownLatch_CyclicBarrier {
         // 4 CyclicBarrier并发优化-对账系统操作耗时：1270 ms 左右
         // countTimeExec(object -> {
         //     try {
-        //         checkSystem_cyclicBarrierOptimize();
+        //         checkSystemCyclicBarrierOptimize();
         //     } catch (InterruptedException e) {
         //         throw new RuntimeException(e);
         //     }
@@ -291,9 +294,9 @@ public class _16_CountDownLatch_CyclicBarrier {
 
 
 /**
- * 子线程的是否全部执行完成的计数器
+ * 判断所有子线程是否都执行完成的计数器
+ *  - 主线程判断计时器是否为 0，如果不为 0 则主线程阻塞，为 0 则主线程继续执行，表示所有子线程已执行完。
  *  - 主线程持有一个计数器，每执行完一个子线程计数器减一，如果计时器等于 0，唤醒阻塞的线程。
- *  - 主线程判断计时器是否为 0，如果不为 0 则主线程阻塞，为 0 则主线程继续执行。
  */
 class ThreadNumber{
     private long runningTheadNum = 0;
@@ -331,6 +334,10 @@ class ThreadNumber{
 
 }
 
+/**
+ * 使用上述的计时器实现：
+ * 主线程能够等待所有子线程执行完成后再执行
+ */
 class MultiLock {
     // 账户余额
     private volatile long balance;

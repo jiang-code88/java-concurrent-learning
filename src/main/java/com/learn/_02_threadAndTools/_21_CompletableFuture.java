@@ -1,17 +1,20 @@
 package com.learn._02_threadAndTools;
 
+import com.learn.common.CommTools;
+
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Java 1.8 提供 CompletableFuture 工具类来支持异步编程，功能十分强大。
+ * Java 1.8 提供了 CompletableFuture 工具类来支持异步编程，功能十分强大。
  *
- * 多线程优化性能，其实不过就是将串行操作变成并行操作，
- * 发现在串行转换成并行的过程中，一定会涉及到异步化
+ * 用多线程优化性能，其实不过就是将串行操作变成并行操作，
+ * 而在串行转换成并行的过程中，一定会涉及到异步化
  */
 public class _21_CompletableFuture {
     public static void main(String[] args) {
+
         /* CompletableFuture 的使用指导 */
 
         // 1 创建 CompletableFuture 对象（表示一个异步任务）
@@ -43,9 +46,15 @@ public class _21_CompletableFuture {
 
         // 4.1 描述任务串行关系
         // <U> CompletableFuture<U> thenApply(Function<? super T,? extends U> fn)
+        //  - Function<T, R> 接口对应的方法为 R apply(T t); 既能接收参数也支持返回值。
         // CompletableFuture<Void> thenAccept(Consumer<? super T> consumer)
+        //  - Consumer<T> 接口对应的方法是 void accept(T t); 虽然支持参数，但却不支持回值。
         // CompletableFuture<Void> thenRun(Runnable action)
-        // apply();
+        //  - Runnable 接口对应的方法是 run(); 既不能接收参数也不支持返回值。
+        // <U> CompletableFuture<U> thenCompose(Function<? super T, ? extends CompletionStage<U>> fn)
+        //  - 该方法会新创建出一个子流程，但最终结果和 thenApply 方法是相同的。
+        // 如果方法带有 Async 后缀代表的是异步执行 fn、consumer 或者 action，即不是在调用方法的线程中执行的，另开一个线程。
+        // apply(); // 使用示例
 
         // 4.2 描述 AND 汇聚关系
         // <U,V> CompletableFuture<V> thenCombine(CompletionStage<? extends U> other,
@@ -58,13 +67,17 @@ public class _21_CompletableFuture {
         // <U> CompletableFuture<U> applyToEither(CompletionStage<? extends T> other, Function<? super T, U> fn)
         // CompletableFuture<Void> acceptEither(CompletionStage<? extends T> other, Consumer<? super T> action)
         // CompletableFuture<Void> runAfterEither(CompletionStage<?> other, Runnable action)
-        // either();
+        // either(); // 使用示例
 
         // 5 异常处理
         // CompletableFuture<T> exceptionally(Function<Throwable, ? extends T> fn)
+        //  - 使用类似于 try{}catch{} 中的 catch{}
         // CompletableFuture<T> whenComplete(BiConsumer<? super T, ? super Throwable> action)
         // <U> CompletableFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn)
-        // exception();
+        //  - whenComplete() 和 handle() 使用类似于 try{}finally{} 中的 finally{}
+        //    无论是否发生异常都会执行 whenComplete() 中的回调函数 consumer 和 handle() 中的回调函数 fn
+        //    区别在于 whenComplete() 不支持返回结果，handle() 是支持返回结果的。
+        // exception(); // 使用示例
     }
 
     public static void apply(){
@@ -72,8 +85,8 @@ public class _21_CompletableFuture {
         // 虽然这是一个异步流程，但任务①②③④却是串行执行的，②依赖①的执行结果，③依赖②的执行结果，④依赖于③的执行结果。
         CompletableFuture<String> f0 =
                 CompletableFuture.supplyAsync(() -> "Hello World") // ①
-                        .thenApply(s -> s + " QQ")            // ②
-                        .thenApply(s -> s + " WeChat")        // ③
+                        .thenApply(s -> s + " QQ")                 // ②
+                        .thenApply(s -> s + " WeChat")             // ③
                         .thenApply(String::toUpperCase);           // ④
         System.out.println(f0.join()); // 输出结果：HELLO WORLD QQ
     }
@@ -81,38 +94,35 @@ public class _21_CompletableFuture {
     public static void either(){
         CompletableFuture<String> f1 =
                 CompletableFuture.supplyAsync(()->{
-                    int t = getRandom(5, 10);
-                    BoilingWaterBrewTea.sleep(t, TimeUnit.SECONDS);
-                    return String.valueOf("f1：" + t);
+                    int t = CommTools.getRandom(5, 10);
+                    CommTools.sleep(t, TimeUnit.SECONDS);
+                    return "f1：" + t;
                 });
 
         CompletableFuture<String> f2 =
                 CompletableFuture.supplyAsync(()->{
-                    int t = getRandom(5, 10);
-                    BoilingWaterBrewTea.sleep(t, TimeUnit.SECONDS);
-                    return String.valueOf("f2：" + t);
+                    int t = CommTools.getRandom(5, 10);
+                    CommTools.sleep(t, TimeUnit.SECONDS);
+                    return "f2：" + t;
                 });
 
-        CompletableFuture<String> f3 = f1.applyToEither(f2,s -> s + " SECONDS");
+        // f1 或者 f2 其中一个执行完成后会使用返回结果执行 f3
+        CompletableFuture<String> f3 = f1.applyToEither(f2, s -> s + " SECONDS");
         System.out.println(f3.join());
     }
 
     public static void exception(){
         CompletableFuture<Integer>
                 f0 = CompletableFuture
-                .supplyAsync(()->(7/0))
+                .supplyAsync(()->(7/0)) // 执行 7/0 就会出现除零错误这个运行时异常
                 .thenApply(r->r*10)
-                .exceptionally(e->{
+                .exceptionally(e->{ // exceptionally() 的使用非常类似于 try{}catch{}中的 catch{}
                     System.out.println(e.getMessage());
                     return 7;
                 });
         System.out.println(f0.join());
     }
 
-    public static int getRandom(int lower, int upper){
-        Random random = new Random();
-        return random.nextInt(upper - lower + 1) + lower;
-    }
 }
 
 /**
@@ -135,41 +145,34 @@ public class _21_CompletableFuture {
  *  3）代码更简练并且专注于业务逻辑，几乎所有代码都是业务逻辑相关的。
  */
 class BoilingWaterBrewTea{
-    public static void sleep(long timeout, TimeUnit timeUnit){
-        try {
-            timeUnit.sleep(timeout);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static void main(String[] args) {
-        // T1（任务一）：洗水壶 -> 烧热水
+        // T1（任务一）：洗水壶 -> 烧开水
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(()->{
             System.out.println("T1:洗水壶...");
-            sleep(1, TimeUnit.SECONDS);
+            CommTools.sleep(1, TimeUnit.SECONDS);
 
             System.out.println("T1:烧开水...");
-            sleep(15, TimeUnit.SECONDS);
+            CommTools.sleep(15, TimeUnit.SECONDS);
         });
 
         // T2（任务二）：洗茶壶 -> 洗茶杯 -> 拿茶叶
         CompletableFuture<String> f2 = CompletableFuture.supplyAsync(()->{
             System.out.println("T2:洗茶壶...");
-            sleep(1, TimeUnit.SECONDS);
+            CommTools.sleep(1, TimeUnit.SECONDS);
 
             System.out.println("T2:洗茶杯...");
-            sleep(2, TimeUnit.SECONDS);
+            CommTools.sleep(2, TimeUnit.SECONDS);
 
             System.out.println("T2:拿茶叶...");
-            sleep(1, TimeUnit.SECONDS);
+            CommTools.sleep(1, TimeUnit.SECONDS);
             return "龙井";
         });
 
-        // T3（任务三）：任务1和任务2完成后执行 -> 泡茶
+        // T3（任务三）：任务 1 和任务 2 完成后执行 -> 泡茶
+        // 参数一传入任务 f1 的返回值，参数二传入任务 f2 的返回值。由于任务 f1 没有返回值所以使用 __ 表示省略传参数。
         CompletableFuture<String> f3 = f1.thenCombine(f2, (__, teaName)->{
-            System.out.println("T1:拿到茶叶:" + teaName);
-            System.out.println("T1:泡茶...");
+            System.out.println("T3:拿到茶叶:" + teaName);
+            System.out.println("T3:泡茶...");
             return "上茶:" + teaName;
         });
 

@@ -18,7 +18,5 @@ import com.sun.org.apache.xpath.internal.operations.String;
  *
  */
 public class _01_Immutability {
-    public static void main(String[] args) {
 
-    }
 }

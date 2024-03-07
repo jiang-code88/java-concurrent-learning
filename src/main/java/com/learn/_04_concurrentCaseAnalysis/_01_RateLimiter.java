@@ -1,4 +1,4 @@
-package com.learn._04_caseAnalysis;
+package com.learn._04_concurrentCaseAnalysis;
 
 import com.google.common.util.concurrent.RateLimiter;
 

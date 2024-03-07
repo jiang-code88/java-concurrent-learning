@@ -7,11 +7,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Java 线程的线程状态
  *
- * new
+ * Java 线程状态转换关系图
+ * NEW
  * ｜
- * runnable <-> blocked / waiting / time_waiting
+ * RUNNABLE <-> BLOCKED / WAITING / TIME_WAITING
  * ｜
- * terminal
+ * TERMINATED
  *
  * 1. 如果 Java 线程处于 blocked / waiting / time_waiting 状态之一，那么这个线程就永远没有 CPU 的使用权。
  *
@@ -63,11 +64,11 @@ public class _07_ThreadStatus {
     private static Logger LOGGER = LoggerFactory.getLogger(_07_ThreadStatus.class);
 
     public static void main(String[] args) throws InterruptedException {
-        // 1.中止运行的线程
+        // 1.中止正在运行的线程
         // interruptThread();
 
         // 2.中止处于 TIMED_WAITING 状态的线程
-        //   在 sleep 函数 TIMED_WAITING 状态的线程是无法被正常中止的
+        //   执行 sleep 函数处于 TIMED_WAITING 状态的线程是无法被正常中止的
         // interruptSleepThread();
 
         // 3.正确中止处于 TIMED_WAITING 状态的线程
