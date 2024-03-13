@@ -20,7 +20,8 @@ import java.util.function.Function;
  * CountDownLatch 和 CyclicBarrier 是 Java 并发包提供的两个非常易用的线程同步工具类，
  * - CountDownLatch 主要用来解决一个线程等待多个线程的场景。
  * - CyclicBarrier 是一组线程之间互相等待。
- *   CyclicBarrier 的计数器是可以循环利用的，而且具备自动重置的功能，一旦计数器减到 0 会自动重置到你设置的初始值。
+ *   CyclicBarrier 的计数器是可以循环利用的，而且具备自动重置的功能，
+ *   一旦计数器减到 0 会自动重置到你设置的初始值。
  *   除此之外，CyclicBarrier 还可以设置回调函数，可以说是功能丰富。
  *
  * 场景：

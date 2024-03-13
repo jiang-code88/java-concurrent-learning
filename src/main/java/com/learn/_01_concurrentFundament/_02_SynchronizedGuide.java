@@ -1,6 +1,5 @@
 package com.learn._01_concurrentFundament;
 
-import com.learn._02_threadAndTools._01_SynLockDemo;
 
 /**
  * Java 提供的互斥锁 synchronized，用于解决原子性问题

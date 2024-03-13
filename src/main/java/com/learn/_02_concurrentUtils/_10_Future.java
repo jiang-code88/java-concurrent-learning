@@ -35,8 +35,9 @@ import java.util.concurrent.TimeUnit;
  *    1) 可以将 FutureTask 对象作为任务提交给 ThreadPoolExecutor 去执行，也可以直接被 Thread 执行；
  *
  *  - Future 适用场景：
- *    利用多线程可以快速将一些串行的任务并行化，从而提高性能；如果任务之间有依赖关系，
- *    比如当前任务依赖前一个任务的执行结果，这种问题基本上都可以用 Future 来解决。
+ *    1. 利用多线程可以快速将一些串行的任务并行化，从而提高性能；
+ *    2. 如果任务之间有依赖关系，比如当前任务依赖前一个任务的执行结果，
+ *       这种问题基本上都可以用 Future 来解决。
  */
 public class _10_Future {
     // 创建线程池

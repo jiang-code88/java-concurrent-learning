@@ -28,7 +28,8 @@ import org.slf4j.LoggerFactory;
  *      当线程 thread A 执行完，原来等待它的线程又会从 WAITING 状态转换到 RUNNABLE。
  *    - 调用 LockSupport.park() 方法。调用 LockSupport.park() 方法，
  *      当前线程会阻塞，线程的状态会从 RUNNABLE 转换到 WAITING。
- *      调用 LockSupport.unpark(Thread thread) 可唤醒目标线程，目标线程的状态又会从 WAITING 状态转换到 RUNNABLE。
+ *      调用 LockSupport.unpark(Thread thread) 可唤醒目标线程，
+ *      目标线程的状态又会从 WAITING 状态转换到 RUNNABLE。
  *
  * 4. RUNNABLE 与 TIMED_WAITING 的状态转换：
  *    1）调用带超时参数的 Thread.sleep(long millis) 方法；
@@ -59,6 +60,21 @@ import org.slf4j.LoggerFactory;
  *    如果其他线程调用线程 A 的 interrupt() 方法，
  *    那么线程 A 可以通过 isInterrupted() 方法，检测是不是自己被中断了。
  */
+
+/**
+ * 07 局部变量不存在线程安全问题：
+ *
+ * 1.每个线程有自己独立的调用栈，不同线程的调用栈互相干扰。
+ * 2.线程调用每个方法就生成一个栈帧，压入函数调用栈中。
+ * 3.每个方法调用的参数和局部变量都保存在栈帧中。
+ * 4.局部变量是和方法同生共死的，一个变量如果想跨越方法（线程）的边界，就必须创建在堆里。
+ *
+ * 5.由于方法中的局部变量，不存在共享，所以即使不同步也不会有并发问题，这个技术叫做 「线程封闭」
+ *   官方解释是：仅在单线程内访问数据。
+ * 6.对象在堆里，对象的引用（句柄/指针）在栈里。
+ * 7.Java 是引用传递，new 一个 List 对象，通过参数传递给方法。方法操作的是同一个 List 对象。
+ */
+
 public class _08_ThreadStatus {
 
     private static Logger LOGGER = LoggerFactory.getLogger(_08_ThreadStatus.class);
@@ -72,7 +88,7 @@ public class _08_ThreadStatus {
         // interruptSleepThread();
 
         // 3.正确中止处于 TIMED_WAITING 状态的线程
-        // interruptSleepThread_Success();
+        // correctInterruptSleepThread();
     }
 
     public static void interruptThread() throws InterruptedException {
@@ -119,7 +135,7 @@ public class _08_ThreadStatus {
         LOGGER.info("主线程中止子线程");
     }
 
-    public static void interruptSleepThread_Success() throws InterruptedException {
+    public static void correctInterruptSleepThread() throws InterruptedException {
         Thread thread = new Thread(()->{
             Thread th = Thread.currentThread();
             while (true){
@@ -146,17 +162,3 @@ public class _08_ThreadStatus {
         LOGGER.info("主线程中止子线程");
     }
 }
-
-/**
- * 07 局部变量不存在线程安全问题：
- *
- * 1.每个线程有自己独立的调用栈，不同线程的调用栈互相干扰。
- * 2.线程调用每个方法就生成一个栈帧，压入函数调用栈中。
- * 3.每个方法调用的参数和局部变量都保存在栈帧中。
- * 4.局部变量是和方法同生共死的，一个变量如果想跨越方法（线程）的边界，就必须创建在堆里。
- *
- * 5.由于方法中的局部变量，不存在共享，所以即使不同步也不会有并发问题，这个技术叫做 「线程封闭」
- *   官方解释是：仅在单线程内访问数据。
- * 6.对象在堆里，对象的引用（句柄/指针）在栈里。
- * 7.Java 应该是引用传递，new 一个 List 对象，通过参数传递给方法。方法操作的是同一个 List 对象。
- */

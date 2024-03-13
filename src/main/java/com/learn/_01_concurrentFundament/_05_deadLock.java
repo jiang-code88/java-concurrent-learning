@@ -28,12 +28,12 @@ public class _05_deadLock {
         // A --转账--> B
         // B --转账--> A
         // 对互斥资源进行排序，按序加锁，避免死锁发生
-        // transferAB_orderly();
+        // transferABOrderly();
 
         // A --转账--> B
         // B --转账--> A
         // 一次性申请 A 锁和 B 锁后才访问互斥资源，避免死锁发生
-        // transferAB_applyAll();
+        // transferABApplyAll();
     }
 
     public static void transferABC() throws InterruptedException {
@@ -99,7 +99,7 @@ public class _05_deadLock {
                 "B=" + accountB.getBalance());
     }
 
-    public static void transferAB_orderly() throws InterruptedException {
+    public static void transferABOrderly() throws InterruptedException {
         // 账户初始总金额
         long count = 1000;
         // 单次转账金额
@@ -124,7 +124,7 @@ public class _05_deadLock {
                 "B=" + accountB.getBalance());
     }
 
-    public static void transferAB_applyAll() throws InterruptedException {
+    public static void transferABApplyAll() throws InterruptedException {
         // 账户初始总金额
         long count = 1000;
         // 单次转账金额
