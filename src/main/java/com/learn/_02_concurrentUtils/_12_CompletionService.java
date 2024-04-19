@@ -219,7 +219,8 @@ public class _12_CompletionService {
         //     }
         // });
 
-        // 3 使用「线程池 + Future + 阻塞队列」优化，解决存在的问题
+        // 410 毫秒
+        // 3 使用「线程池 + Future + 阻塞队列」优化，解决先完成的询价不能先存入问题
         // 模拟类似 CompletionService 的原理
         // CommTools.countTimeExec(()->{
         //     try {
