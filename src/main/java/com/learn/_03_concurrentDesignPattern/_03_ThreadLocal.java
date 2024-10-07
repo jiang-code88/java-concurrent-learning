@@ -45,15 +45,15 @@ public class _03_ThreadLocal {
     public static void main(String[] args) {
         // 1 手动启动线程使用 ThreadLocal 场景
         // 随着 Thread 对象的回收，线程拥有的 ThreadLocal 变量也回被自动回收掉，避免容易发生的内存泄漏
-        // TheadLocalTest();
+        TheadLocalTest();
 
         // 2 线程池中线程使用 ThreadLocal 场景
         // 线程池中，线程的 Thread 对象会持续存在，所以建议手动释放线程拥有的 ThreadLocal 变量，避免潜在的内存泄漏风险
-        ThreadPoolTheadLocalTest();
+        // ThreadPoolTheadLocalTest();
     }
 
     public static void TheadLocalTest(){
-        // 同一个线程多次调用，返回的 id 值相同
+        // 同一个线程多次调用，返回的 id 值相同，都是同一个 Long 类型变量
         new Thread(()->{
             long id1 = get();
             long id2 = get();
@@ -62,7 +62,7 @@ public class _03_ThreadLocal {
                     + "id2: " + id2);
         }).start();
 
-        // 不同线程多次调用，返回的 id 值不同
+        // 不同线程多次调用，返回的 id 值不同，是不同的 Long 类型变量
         new Thread(()->{
             long id = get();
             System.out.println(Thread.currentThread().getName() + ": " + "id: " + id);

@@ -4,15 +4,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * 两阶段终止模式——优雅的终止正在运行的线程
+ * 两阶段终止模式——优雅地终止正在运行的线程
  *  - 所谓优雅就是给被终止的线程一个料理后事的机会，而不是一剑封喉）
  *  1. 第一阶段：发送终止指令，使用 interrupt 方法把线程从休眠状态转化到 RUNNABLE 状态。
  *  2. 第二阶段：响应终止指令，线程执行时会去检查终止标志位，如果符合终止条件就自己结束线程运行。
  *
  * 线程池的优雅终止
- *  - 线程池提供了两个方法：shutdown()和shutdownNow() 用于终止线程池中线程的运行。
+ *  - 线程池提供了两个方法：shutdown() 和 shutdownNow() 用于终止线程池中线程的运行。
  *  - shutdown() 是保守的关闭线程池的方法，只会影响到阻塞队列接受任务。
- *  - shutdown() 是激进的关闭线程池的方法，会影响到线程池所有的任务。
+ *  - shutdownNow() 是激进的关闭线程池的方法，会影响到线程池所有的任务。
  */
 public class _08_TwoStageTermination {
     public static void main(String[] args) {
