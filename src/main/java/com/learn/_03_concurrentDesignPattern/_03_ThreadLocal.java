@@ -85,7 +85,7 @@ public class _03_ThreadLocal {
                 try {
                     // 执行可能出现异常的业务逻辑代码
                     System.out.println(Thread.currentThread().getName() + " : " + threadLocalId.get());
-                    // 因为局部变量不能跨方法，适用于在中间业务代码中调用多个方法，ThreadLocal 变量作为同一线程内多个方法共享变量的场景。
+                    // 因为局部变量不能跨方法，适用于在中间业务代码会调用多个方法，ThreadLocal 变量作为同一线程内多个方法共享变量的场景。
                 } finally {
                     // 手动清理 Thread 拥有的 ThreadLocal 变量
                     threadLocalId.remove();
